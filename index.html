@@ -1,16 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <style>
-  /* 強制表示パッチ */
-  #startQuizHero, #startQuizNav, #startQuizFooter {
-    display: inline-flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: relative !important;
-    z-index: 2 !important;
-  }
-</style>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AI Recommender — powered by Arena</title>
@@ -27,7 +17,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- App styles -->
-  <link rel="stylesheet" href="style.css?v=20250926-1" />
+  <link rel="stylesheet" href="style.css?v=20250926-2" />
 
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -35,14 +25,14 @@
   <!-- Font Awesome (icons) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
 
-  <!-- ENV -->
+  <!-- ENV（必要に応じて入れ替え）-->
   <script>
     window.ENV = {
-      SUPABASE_URL: "https://xxxx.supabase.co",      // ← あなたの Supabase URL
-      SUPABASE_ANON_KEY: "your-anon-key",            // ← Supabase anon key
-      N8N_WEBHOOK_URL: "https://n8n.yourdomain.com/webhook/quiz", // ← n8n webhook
-      GA_MEASUREMENT_ID: "G-XXXXXXX",                // optional
-      META_PIXEL_ID: ""                              // optional
+      SUPABASE_URL: "",                  // 例: "https://xxxx.supabase.co"
+      SUPABASE_ANON_KEY: "",             // 例: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      N8N_WEBHOOK_URL: "",               // 例: "https://n8n.yourdomain.com/webhook/quiz"
+      GA_MEASUREMENT_ID: "",             // optional
+      META_PIXEL_ID: ""                  // optional
     };
   </script>
 
@@ -80,9 +70,33 @@
     })();
   </script>
 
-  <!-- Failsafe CSS -->
-  <style id="failsafe-css"> … </style>
+  <!-- Failsafe CSS（Tailwindが読めない時の最低限表示） -->
+  <style id="failsafe-css">
+    html{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+    body{color:#0f172a;background:#f8fafc;margin:0}
+    .hidden{display:none!important}
+    .btn-primary,.btn-secondary,.btn-ghost{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 14px;border-radius:10px;border:1px solid #e5e7eb;cursor:pointer;
+      text-decoration:none;font-weight:600;
+    }
+    .btn-lg{padding:14px 20px;font-size:1.0625rem}
+    .btn-primary{background:#4f46e5;color:#fff;border-color:#4338ca}
+    .btn-primary:hover{background:#4338ca}
+    .btn-secondary{background:#fff;color:#111827}
+    .btn-secondary:hover{background:#f3f4f6}
+    .btn-ghost{background:transparent;color:#374151;border-style:dashed}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px}
+    .input{width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:10px}
+    .progress-wrap{height:6px;background:#eef2ff}
+    .progress-bar{height:100%;background:#6366f1;width:0;transition:width .2s ease-in}
+    .result-card{position:relative}
+    .result-card.blur::after{content:"Hidden — unlock for free";position:absolute;inset:0;background:rgba(255,255,255,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;font-weight:700;color:#334155;border-radius:12px}
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111827;color:#fff;padding:10px 12px;border-radius:10px;z-index:60}
+    .anchor-section{scroll-margin-top:84px}
+  </style>
   <script>
+    // Tailwindが有効ならフェイルセーフCSSを削除
     (function(){
       const t=document.createElement('div'); t.className='hidden';
       document.documentElement.appendChild(t);
@@ -90,10 +104,195 @@
       if(ok){ const fs=document.getElementById('failsafe-css'); fs && fs.remove(); }
     })();
   </script>
+
+  <!-- “ボタンが見えない”対策（万一の衝突防止） -->
+  <style>
+    #startQuizHero, #startQuizNav, #startQuizFooter {
+      display:inline-flex; visibility:visible; opacity:1;
+    }
+  </style>
 </head>
 
 <body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
-  … (中略: あなたの元HTMLと同じ) …
-  <script src="main.js?v=20250926-1"></script>
+  <!-- Header -->
+  <header class="w-full border-b border-slate-200 bg-white/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-9 w-9 grid place-items-center rounded-lg bg-indigo-600 text-white text-lg">🤖</div>
+        <span class="font-semibold">AI Recommender — powered by Arena</span>
+      </div>
+      <nav class="hidden sm:flex items-center gap-6">
+        <a href="#how" class="text-sm text-slate-600 hover:text-slate-900">How it works</a>
+        <button id="startQuizNav" class="btn-primary btn-lg" type="button">Start 30-second quiz</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4">
+    <!-- Hero -->
+    <section class="py-14 sm:py-20 text-center">
+      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight">
+        Find your best-fit AI model in 30 seconds
+      </h1>
+      <p class="mt-4 text-lg text-slate-700">
+        Get tailored recommendations for your use case — quick, accurate, and actionable.
+      </p>
+      <div class="mt-8 flex justify-center gap-4">
+        <button id="startQuizHero" class="btn-primary btn-lg" type="button">Start 30-second quiz</button>
+        <a href="#how" class="btn-secondary btn-lg">How it works</a>
+      </div>
+      <div class="mt-4 text-sm text-slate-500">
+        Powered by Chatbot Arena benchmarks <span class="text-slate-400">(unofficial)</span>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how" class="py-8 anchor-section">
+      <h2 class="text-xl font-semibold text-center">How it works</h2>
+      <div class="mt-6 grid sm:grid-cols-3 gap-4">
+        <div class="card"><div class="font-semibold mb-1">1) Answer</div><p class="text-slate-600 text-sm">Tell us your use case and priorities.</p></div>
+        <div class="card"><div class="font-semibold mb-1">2) Get picks</div><p class="text-slate-600 text-sm">We fetch the best models via Arena-backed logic.</p></div>
+        <div class="card"><div class="font-semibold mb-1">3) Start</div><p class="text-slate-600 text-sm">Copy results, save to your inbox, try again anytime.</p></div>
+      </div>
+      <div class="mt-8 text-center">
+        <button id="startQuizFooter" class="btn-primary btn-lg" type="button">Take the quiz</button>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section id="resultsSection" class="py-10 hidden">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-bold">Your top models (Arena-powered)</h2>
+        <div class="text-xs text-slate-500">Source:
+          <span class="inline-flex items-center gap-1">
+            <span class="px-1.5 py-0.5 rounded bg-slate-100 border">Chatbot Arena (Text)</span>
+          </span>
+        </div>
+      </div>
+      <!-- Teaser banner -->
+      <div id="teaserBanner" class="hidden mb-4 p-3 rounded-lg border bg-amber-50 text-amber-900 text-sm">
+        <strong>You’re 1 step away.</strong> Enter your email to unlock ALL picks & bonuses:
+        <em> Quickstart Prompts (10+ ready-to-use)</em> and
+        <em> Top-20 Arena Models chart (12p, monthly updates)</em>.
+        <button id="unlockResultsBtn" class="btn-secondary ml-3" type="button">Reveal all picks & bonuses</button>
+        <span class="ml-2 text-amber-800">No spam. 1-click unsubscribe.</span>
+      </div>
+      <div id="resultsContent" class="grid md:grid-cols-3 gap-4"></div>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <button id="saveResultBtn" class="btn-primary" type="button"><i class="fa-regular fa-floppy-disk mr-2"></i>Save result</button>
+        <button id="copyLinkBtn" class="btn-secondary" type="button"><i class="fa-regular fa-link mr-2"></i>Copy link</button>
+        <button id="tryAgainBtn" class="btn-ghost" type="button">Try again</button>
+      </div>
+      <div id="resultsNote" class="mt-4 text-sm text-amber-700"></div>
+    </section>
+
+    <!-- Privacy & Terms -->
+    <section id="privacy" class="max-w-6xl mx-auto px-4 py-10 anchor-section">
+      <h2 class="text-xl font-semibold">Privacy</h2>
+      <p class="mt-2 text-sm text-slate-600">
+        We store quiz responses (use case, priorities, selected category) and basic events in Supabase for analytics and product improvement.
+        Emails are used to deliver your report and product updates. Do not submit sensitive information. You can unsubscribe anytime.
+      </p>
+    </section>
+
+    <section id="terms" class="max-w-6xl mx-auto px-4 py-10 anchor-section">
+      <h2 class="text-xl font-semibold">Terms</h2>
+      <p class="mt-2 text-sm text-slate-600">
+        This is an informational tool. Model picks are generated via your n8n workflow referencing Chatbot Arena data (unofficial).
+        No warranty—use at your own risk.
+      </p>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-4 py-10 border-t bg-white">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-slate-600">© <span id="year"></span> AI Recommender — powered by Arena</div>
+      <div class="flex items-center gap-4 text-sm">
+        <a href="#privacy" class="hover:underline">Privacy</a>
+        <a href="#terms" class="hover:underline">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Quiz Modal -->
+  <div id="quizModal" class="fixed inset-0 hidden z-50">
+    <div class="absolute inset-0 bg-black/50"></div>
+    <div class="relative max-w-xl mx-auto mt-16 mb-10 bg-white rounded-xl shadow-xl border overflow-hidden">
+      <!-- Progress -->
+      <div class="progress-wrap"><div id="progressBar" class="progress-bar" style="width:0%"></div></div>
+      <div class="flex items-center justify-between p-4 border-b">
+        <h3 class="font-semibold">30-second quiz</h3>
+        <div class="text-sm text-slate-500">
+          <span id="progressText">1/4</span>
+          <span id="progressDetail" class="ml-2 text-slate-400">Question 1 of 4 · Let’s go</span>
+        </div>
+        <button id="closeQuiz" class="text-slate-500 hover:text-slate-900" aria-label="Close" type="button">
+          <i class="fa-regular fa-xmark"></i>
+        </button>
+      </div>
+      <div class="p-4">
+        <div id="formError" class="mb-3 text-sm text-rose-600 hidden"></div>
+
+        <!-- Q1 -->
+        <div id="step1" class="quiz-step">
+          <label class="block font-medium mb-2">Primary use case</label>
+          <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Primary use case"></div>
+          <p class="form-hint">Tap to select (auto next)</p>
+        </div>
+
+        <!-- Q2 -->
+        <div id="step2" class="quiz-step hidden">
+          <label class="block font-medium mb-2">What do you value most?</label>
+          <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Priority"></div>
+          <p class="form-hint">Tap to select (auto next)</p>
+        </div>
+
+        <!-- Q3 -->
+        <div id="step3" class="quiz-step hidden">
+          <label class="block font-medium mb-2">Final preference</label>
+          <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Final preference"></div>
+          <p class="form-hint">Tap to select (auto next)</p>
+        </div>
+
+        <!-- Q4 email (required) -->
+        <div id="step4" class="quiz-step hidden">
+          <label for="emailInput" class="block font-medium mb-2">Enter your email to reveal all picks & bonuses</label>
+          <input id="emailInput" type="email" inputmode="email" placeholder="you@example.com"
+                 class="input" autocapitalize="off" autocomplete="email" />
+          <p class="mt-2 text-xs text-slate-600">No spam. 1-click unsubscribe. Privacy-first.</p>
+        </div>
+
+        <div class="mt-6 flex items-center justify-between">
+          <button id="backBtn" class="btn-ghost" disabled type="button">Back</button>
+          <div class="flex items-center gap-2">
+            <button id="nextBtn" class="btn-primary hidden" type="button">Next</button>
+            <button id="submitBtn" class="btn-primary hidden" type="button">Reveal now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toastContainer"></div>
+
+  <!-- Smooth-scroll & footer year -->
+  <script>
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', (e)=>{
+        const id = a.getAttribute('href').slice(1);
+        const el = document.getElementById(id);
+        if(!el) return;
+        e.preventDefault();
+        document.getElementById('quizModal')?.classList.add('hidden');
+        el.scrollIntoView({ behavior:'smooth', block:'start' });
+      });
+    });
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+
+  <!-- メインJS（キャッシュバスター付き） -->
+  <script src="main.js?v=20250926-2"></script>
 </body>
 </html>
