@@ -18,16 +18,16 @@
   <meta property="og:title" content="AI Recommender — powered by Arena" />
   <meta property="og:description" content="Find your best-fit AI model in 30 seconds. Tailored, accurate, actionable." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://your-domain.example/" />
+  <meta property="og:url" content="https://pick-your-ai.com/" />
   <meta property="og:image" content="https://og-playground.vercel.app/api/og?title=AI%20Recommender&subtitle=Powered%20by%20Arena" />
-  <link rel="canonical" href="https://your-domain.example/">
+  <link rel="canonical" href="https://pick-your-ai.com/">
   <link rel="icon" href="https://fav.farm/🤖" />
 
   <!-- Tailwind (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- App styles -->
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css?v=20250926-1" />
 
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -38,11 +38,11 @@
   <!-- ENV -->
   <script>
     window.ENV = {
-      SUPABASE_URL: "",         // ← paste yours
-      SUPABASE_ANON_KEY: "",    // ← paste yours
-      N8N_WEBHOOK_URL: "",      // ← paste yours
-      GA_MEASUREMENT_ID: "",    // optional
-      META_PIXEL_ID: ""         // optional
+      SUPABASE_URL: "https://xxxx.supabase.co",      // ← あなたの Supabase URL
+      SUPABASE_ANON_KEY: "your-anon-key",            // ← Supabase anon key
+      N8N_WEBHOOK_URL: "https://n8n.yourdomain.com/webhook/quiz", // ← n8n webhook
+      GA_MEASUREMENT_ID: "G-XXXXXXX",                // optional
+      META_PIXEL_ID: ""                              // optional
     };
   </script>
 
@@ -103,7 +103,6 @@
     .result-card{position:relative}
     .result-card.blur::after{content:"Hidden — unlock for free";position:absolute;inset:0;background:rgba(255,255,255,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;font-weight:700;color:#334155;border-radius:12px}
     .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111827;color:#fff;padding:10px 12px;border-radius:10px;z-index:60}
-    /* Prevent anchor targets from hiding under sticky header */
     .anchor-section{scroll-margin-top:84px}
   </style>
   <script>
@@ -138,16 +137,13 @@
       <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight">
         Find your best-fit AI model in 30 seconds
       </h1>
-
       <p class="mt-4 text-lg text-slate-700">
         Get tailored recommendations for your use case — quick, accurate, and actionable.
       </p>
-
       <div class="mt-8 flex justify-center gap-4">
         <button id="startQuizHero" class="btn-primary btn-lg" type="button">Start 30-second quiz</button>
         <a href="#how" class="btn-secondary btn-lg">How it works</a>
       </div>
-
       <div class="mt-4 text-sm text-slate-500">
         Powered by Chatbot Arena benchmarks <span class="text-slate-400">(unofficial)</span>
       </div>
@@ -176,7 +172,6 @@
           </span>
         </div>
       </div>
-
       <!-- Teaser banner -->
       <div id="teaserBanner" class="hidden mb-4 p-3 rounded-lg border bg-amber-50 text-amber-900 text-sm">
         <strong>You’re 1 step away.</strong> Enter your email to unlock ALL picks & bonuses:
@@ -185,15 +180,12 @@
         <button id="unlockResultsBtn" class="btn-secondary ml-3" type="button">Reveal all picks & bonuses</button>
         <span class="ml-2 text-amber-800">No spam. 1-click unsubscribe.</span>
       </div>
-
       <div id="resultsContent" class="grid md:grid-cols-3 gap-4"></div>
-
       <div class="mt-6 flex flex-wrap gap-3">
         <button id="saveResultBtn" class="btn-primary" type="button"><i class="fa-regular fa-floppy-disk mr-2"></i>Save result</button>
         <button id="copyLinkBtn" class="btn-secondary" type="button"><i class="fa-regular fa-link mr-2"></i>Copy link</button>
         <button id="tryAgainBtn" class="btn-ghost" type="button">Try again</button>
       </div>
-
       <div id="resultsNote" class="mt-4 text-sm text-amber-700"></div>
     </section>
 
@@ -232,7 +224,6 @@
     <div class="relative max-w-xl mx-auto mt-16 mb-10 bg-white rounded-xl shadow-xl border overflow-hidden">
       <!-- Progress -->
       <div class="progress-wrap"><div id="progressBar" class="progress-bar" style="width:0%"></div></div>
-
       <div class="flex items-center justify-between p-4 border-b">
         <h3 class="font-semibold">30-second quiz</h3>
         <div class="text-sm text-slate-500">
@@ -243,39 +234,12 @@
           <i class="fa-regular fa-xmark"></i>
         </button>
       </div>
-
       <div class="p-4">
         <div id="formError" class="mb-3 text-sm text-rose-600 hidden"></div>
-
-        <!-- Q1 -->
-        <div id="step1" class="quiz-step">
-          <label class="block font-medium mb-2">Primary use case</label>
-          <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Primary use case"></div>
-          <p class="form-hint">Tap to select (auto next)</p>
-        </div>
-
-        <!-- Q2 -->
-        <div id="step2" class="quiz-step hidden">
-          <label class="block font-medium mb-2">What do you value most?</label>
-          <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Priority"></div>
-          <p class="form-hint">Tap to select (auto next)</p>
-        </div>
-
-        <!-- Q3 -->
-        <div id="step3" class="quiz-step hidden">
-          <label class="block font-medium mb-2">Final preference</label>
-          <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Final preference"></div>
-          <p class="form-hint">Tap to select (auto next)</p>
-        </div>
-
-        <!-- Q4 email (required) -->
-        <div id="step4" class="quiz-step hidden">
-          <label for="emailInput" class="block font-medium mb-2">Enter your email to reveal all picks & bonuses</label>
-          <input id="emailInput" type="email" inputmode="email" placeholder="you@example.com"
-                 class="input" autocapitalize="off" autocomplete="email" />
-          <p class="mt-2 text-xs text-slate-600">No spam. 1-click unsubscribe. Privacy-first.</p>
-        </div>
-
+        <div id="step1" class="quiz-step"> ... </div>
+        <div id="step2" class="quiz-step hidden"> ... </div>
+        <div id="step3" class="quiz-step hidden"> ... </div>
+        <div id="step4" class="quiz-step hidden"> ... </div>
         <div class="mt-6 flex items-center justify-between">
           <button id="backBtn" class="btn-ghost" disabled type="button">Back</button>
           <div class="flex items-center gap-2">
@@ -290,7 +254,7 @@
   <!-- Toast -->
   <div id="toastContainer"></div>
 
-  <!-- Smooth-scroll for in-page anchors & close modal if open -->
+  <!-- Smooth-scroll & footer year -->
   <script>
     document.querySelectorAll('a[href^="#"]').forEach(a=>{
       a.addEventListener('click', (e)=>{
@@ -302,10 +266,9 @@
         el.scrollIntoView({ behavior:'smooth', block:'start' });
       });
     });
-    // footer year
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 
-  <script src="js/main.js"></script>
+  <script src="js/main.js?v=20250926-1"></script>
 </body>
 </html>
